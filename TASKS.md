@@ -1,8 +1,8 @@
 # Project Tasks & Execution Roadmap
 
 ## Progress & Execution State
-- **Current Phase**: Phase 1 Foundation Completed 🚀 -> Moving to Phase 2: Integrations
-- **Status**: PHASE 1 COMPLETE (100% of tickets TASK-101 to TASK-107 verified with 38 passing unit tests, 84.4% business logic coverage, and clean Next.js 15 production build).
+- **Current Phase**: Phase 2: Integrations
+- **Status**: TASK-201 Complete (Courier Status Normalizer Module for Pathao, Steadfast, and RedX implemented with unit tests).
 - **Completed**:
   - [x] Initial architecture documentation (`/docs/ARCHITECTURE.md`)
   - [x] Initial data model & Prisma schema specification (`/docs/DATA_MODEL.md`)
@@ -14,8 +14,9 @@
   - [x] [TASK-105] Dashboard Shell, Navigation & Responsive Layout
   - [x] [TASK-106] Modular Domain Scaffolding & Base Repositories
   - [x] [TASK-107] Phase 1 Verification & Automated Test Suite
-- **In Progress**: Phase 2 Integrations
-- **Next Up**: [TASK-201] Courier status normalizer module (`mapStatus` for Pathao, Steadfast, RedX) + unit tests
+  - [x] [TASK-201] Courier status normalizer module (`mapStatus` for Pathao, Steadfast, RedX) + unit tests
+- **In Progress**: [TASK-202] WooCommerce REST API v3 connector (encrypted keys, order fetcher)
+- **Next Up**: [TASK-203] Shopify OAuth connector & webhook receivers
 
 ---
 
@@ -126,7 +127,7 @@
 ## Roadmap: Upcoming Phases
 
 ### Phase 2: Integrations
-- [TASK-201] Courier status normalizer module (`mapStatus` for Pathao, Steadfast, RedX) + unit tests
+- [x] [TASK-201] Courier status normalizer module (`mapStatus` for Pathao, Steadfast, RedX) + unit tests
 - [TASK-202] WooCommerce REST API v3 connector (encrypted keys, order fetcher)
 - [TASK-203] Shopify OAuth connector & webhook receivers
 - [TASK-204] Pathao, Steadfast, RedX webhook endpoints with signature validation
