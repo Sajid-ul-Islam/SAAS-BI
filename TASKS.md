@@ -2,7 +2,7 @@
 
 ## Progress & Execution State
 - **Current Phase**: Phase 2: Integrations
-- **Status**: TASK-201 Complete (Courier Status Normalizer Module for Pathao, Steadfast, and RedX implemented with unit tests).
+- **Status**: TASK-202 Complete (WooCommerce REST API v3 connector, AES-256-GCM encryption for credentials, canonical order transformation, unit tests passing).
 - **Completed**:
   - [x] Initial architecture documentation (`/docs/ARCHITECTURE.md`)
   - [x] Initial data model & Prisma schema specification (`/docs/DATA_MODEL.md`)
@@ -15,8 +15,9 @@
   - [x] [TASK-106] Modular Domain Scaffolding & Base Repositories
   - [x] [TASK-107] Phase 1 Verification & Automated Test Suite
   - [x] [TASK-201] Courier status normalizer module (`mapStatus` for Pathao, Steadfast, RedX) + unit tests
-- **In Progress**: [TASK-202] WooCommerce REST API v3 connector (encrypted keys, order fetcher)
-- **Next Up**: [TASK-203] Shopify OAuth connector & webhook receivers
+  - [x] [TASK-202] WooCommerce REST API v3 connector (encrypted keys, order fetcher)
+- **In Progress**: [TASK-203] Shopify OAuth connector & webhook receivers
+- **Next Up**: [TASK-204] Pathao, Steadfast, RedX webhook endpoints with signature validation
 
 ---
 
@@ -128,7 +129,7 @@
 
 ### Phase 2: Integrations
 - [x] [TASK-201] Courier status normalizer module (`mapStatus` for Pathao, Steadfast, RedX) + unit tests
-- [TASK-202] WooCommerce REST API v3 connector (encrypted keys, order fetcher)
+- [x] [TASK-202] WooCommerce REST API v3 connector (encrypted keys, order fetcher)
 - [TASK-203] Shopify OAuth connector & webhook receivers
 - [TASK-204] Pathao, Steadfast, RedX webhook endpoints with signature validation
 - [TASK-205] Inngest background job setup for order sync and courier polling
