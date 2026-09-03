@@ -2,14 +2,15 @@
 
 ## Progress & Execution State
 - **Current Phase**: Phase 1 Foundation
-- **Status**: TASK-101 Complete (Tooling, Next.js 15, Strict TypeScript, Vitest, Env Validation, Structured Logger, BDT Formatter).
+- **Status**: TASK-102 Complete (Prisma Schema, Client Singleton with Structured Logging, Seed Script, Client Generation).
 - **Completed**:
   - [x] Initial architecture documentation (`/docs/ARCHITECTURE.md`)
   - [x] Initial data model & Prisma schema specification (`/docs/DATA_MODEL.md`)
   - [x] Phase 1 task breakdown with atomic tickets (`TASKS.md`)
   - [x] [TASK-101] Project Scaffolding, Strict Tooling & Config Setup
-- **In Progress**: [TASK-102] Prisma Schema & PostgreSQL Connection Architecture
-- **Next Up**: [TASK-103] Supabase Row Level Security (RLS) & Multi-Tenant Migration
+  - [x] [TASK-102] Prisma Schema & PostgreSQL Connection Architecture
+- **In Progress**: [TASK-103] Supabase Row Level Security (RLS) & Multi-Tenant Migration
+- **Next Up**: [TASK-104] Supabase Auth Flow & Tenant Context Middleware
 
 ---
 
@@ -29,7 +30,7 @@
 
 ---
 
-### [TASK-102] Prisma Schema & PostgreSQL Connection Architecture
+### [x] [TASK-102] Prisma Schema & PostgreSQL Connection Architecture
 - **Objective**: Implement the full Prisma schema from `DATA_MODEL.md`, setup Prisma client singleton with connection pooling support.
 - **Acceptance Criteria**:
   - `prisma/schema.prisma` created with models: `Tenant`, `User`, `Store`, `CourierCredential`, `Order`, `OrderStatusHistory`, `AiCache`, `AiTokenUsage`, `Subscription`, `WebhookEvent`.
