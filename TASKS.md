@@ -2,15 +2,16 @@
 
 ## Progress & Execution State
 - **Current Phase**: Phase 1 Foundation
-- **Status**: TASK-102 Complete (Prisma Schema, Client Singleton with Structured Logging, Seed Script, Client Generation).
+- **Status**: TASK-103 Complete (Supabase RLS Migration SQL with 10 tables isolated, JWT tenant extraction, isolation test suite).
 - **Completed**:
   - [x] Initial architecture documentation (`/docs/ARCHITECTURE.md`)
   - [x] Initial data model & Prisma schema specification (`/docs/DATA_MODEL.md`)
   - [x] Phase 1 task breakdown with atomic tickets (`TASKS.md`)
   - [x] [TASK-101] Project Scaffolding, Strict Tooling & Config Setup
   - [x] [TASK-102] Prisma Schema & PostgreSQL Connection Architecture
-- **In Progress**: [TASK-103] Supabase Row Level Security (RLS) & Multi-Tenant Migration
-- **Next Up**: [TASK-104] Supabase Auth Flow & Tenant Context Middleware
+  - [x] [TASK-103] Supabase Row Level Security (RLS) & Multi-Tenant Migration
+- **In Progress**: [TASK-104] Supabase Auth Flow & Tenant Context Middleware
+- **Next Up**: [TASK-105] Dashboard Shell, Navigation & Responsive Layout
 
 ---
 
@@ -42,7 +43,7 @@
 
 ---
 
-### [TASK-103] Supabase Row Level Security (RLS) & Multi-Tenant Migration
+### [x] [TASK-103] Supabase Row Level Security (RLS) & Multi-Tenant Migration
 - **Objective**: Write comprehensive PostgreSQL migration scripts for Supabase RLS policies across all tenant models.
 - **Acceptance Criteria**:
   - SQL script `prisma/migrations/0_init_rls/migration.sql` created.
