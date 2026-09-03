@@ -2,7 +2,7 @@
 
 ## Progress & Execution State
 - **Current Phase**: Phase 1 Foundation
-- **Status**: TASK-104 Complete (Supabase Auth Client/Server, Session & Tenant Context Middleware, Login/Signup/Invite pages, Auth Callback, API routes).
+- **Status**: TASK-105 Complete (Dashboard Shell, Navigation Sidebar, Tenant Switcher, Mobile Drawer, BDT KPI cards, All Routes built & prerendered).
 - **Completed**:
   - [x] Initial architecture documentation (`/docs/ARCHITECTURE.md`)
   - [x] Initial data model & Prisma schema specification (`/docs/DATA_MODEL.md`)
@@ -11,8 +11,9 @@
   - [x] [TASK-102] Prisma Schema & PostgreSQL Connection Architecture
   - [x] [TASK-103] Supabase Row Level Security (RLS) & Multi-Tenant Migration
   - [x] [TASK-104] Supabase Auth Flow & Tenant Context Middleware
-- **In Progress**: [TASK-105] Dashboard Shell, Navigation & Responsive Layout
-- **Next Up**: [TASK-106] Modular Domain Scaffolding & Base Repositories
+  - [x] [TASK-105] Dashboard Shell, Navigation & Responsive Layout
+- **In Progress**: [TASK-106] Modular Domain Scaffolding & Base Repositories
+- **Next Up**: [TASK-107] Phase 1 Verification & Automated Test Suite
 
 ---
 
@@ -72,7 +73,7 @@
 
 ---
 
-### [TASK-105] Dashboard Shell, Navigation & Responsive Layout
+### [x] [TASK-105] Dashboard Shell, Navigation & Responsive Layout
 - **Objective**: Build production-grade dashboard layout with sidebar navigation, tenant switcher, user profile dropdown, and BDT currency formatting.
 - **Acceptance Criteria**:
   - Dashboard layout implemented at `src/app/(dashboard)/layout.tsx`.

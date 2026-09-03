@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { extractTenantIdFromJwtClaims } from './modules/tenants/tenants.service';
+import { extractTenantIdFromJwtClaims } from './lib/auth-utils';
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({

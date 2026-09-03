@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
-export default function InvitePage() {
+function InviteForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailParam = searchParams.get('email') ?? '';
@@ -22,7 +22,6 @@ export default function InvitePage() {
     setErrorMsg(null);
 
     try {
-      // Direct to signup endpoint with invited metadata
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -125,5 +124,19 @@ export default function InvitePage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function InvitePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center p-8">
+          <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+        </div>
+      }
+    >
+      <InviteForm />
+    </Suspense>
   );
 }
