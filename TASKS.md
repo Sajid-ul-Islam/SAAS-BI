@@ -2,7 +2,7 @@
 
 ## Progress & Execution State
 - **Current Phase**: Phase 1 Foundation
-- **Status**: TASK-103 Complete (Supabase RLS Migration SQL with 10 tables isolated, JWT tenant extraction, isolation test suite).
+- **Status**: TASK-104 Complete (Supabase Auth Client/Server, Session & Tenant Context Middleware, Login/Signup/Invite pages, Auth Callback, API routes).
 - **Completed**:
   - [x] Initial architecture documentation (`/docs/ARCHITECTURE.md`)
   - [x] Initial data model & Prisma schema specification (`/docs/DATA_MODEL.md`)
@@ -10,8 +10,9 @@
   - [x] [TASK-101] Project Scaffolding, Strict Tooling & Config Setup
   - [x] [TASK-102] Prisma Schema & PostgreSQL Connection Architecture
   - [x] [TASK-103] Supabase Row Level Security (RLS) & Multi-Tenant Migration
-- **In Progress**: [TASK-104] Supabase Auth Flow & Tenant Context Middleware
-- **Next Up**: [TASK-105] Dashboard Shell, Navigation & Responsive Layout
+  - [x] [TASK-104] Supabase Auth Flow & Tenant Context Middleware
+- **In Progress**: [TASK-105] Dashboard Shell, Navigation & Responsive Layout
+- **Next Up**: [TASK-106] Modular Domain Scaffolding & Base Repositories
 
 ---
 
@@ -56,7 +57,7 @@
 
 ---
 
-### [TASK-104] Supabase Auth Flow & Tenant Context Middleware
+### [x] [TASK-104] Supabase Auth Flow & Tenant Context Middleware
 - **Objective**: Implement authentication flow (signup, login, team member invite) with tenant resolution and server-side session management.
 - **Acceptance Criteria**:
   - Supabase client configured for Server Components, Client Components, and Server Actions.
