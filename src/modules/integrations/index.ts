@@ -5,5 +5,6 @@ export { pathaoConnector } from './couriers/pathao.connector';
 export { steadfastConnector } from './couriers/steadfast.connector';
 export { redxConnector } from './couriers/redx.connector';
 export { wooCommerceConnector } from './stores/woocommerce.connector';
+export { shopifyConnector } from './stores/shopify.connector';
 export { integrationsService } from './integrations.service';
 export { integrationsRepository } from './integrations.repository';
