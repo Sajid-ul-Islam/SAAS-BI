@@ -2,7 +2,7 @@
 
 ## Progress & Execution State
 - **Current Phase**: Phase 2: Integrations
-- **Status**: TASK-203 Complete (Shopify OAuth connector, HMAC verification, webhook signature validation, order transformer, unit tests passing).
+- **Status**: TASK-204 Complete (Pathao, Steadfast, and RedX webhook receiver routes with status normalization, transaction updates, and unit tests).
 - **Completed**:
   - [x] Initial architecture documentation (`/docs/ARCHITECTURE.md`)
   - [x] Initial data model & Prisma schema specification (`/docs/DATA_MODEL.md`)
@@ -17,8 +17,9 @@
   - [x] [TASK-201] Courier status normalizer module (`mapStatus` for Pathao, Steadfast, RedX) + unit tests
   - [x] [TASK-202] WooCommerce REST API v3 connector (encrypted keys, order fetcher)
   - [x] [TASK-203] Shopify OAuth connector & webhook receivers
-- **In Progress**: [TASK-204] Pathao, Steadfast, RedX webhook endpoints with signature validation
-- **Next Up**: [TASK-205] Inngest background job setup for order sync and courier polling
+  - [x] [TASK-204] Pathao, Steadfast, RedX webhook endpoints with signature validation
+- **In Progress**: [TASK-205] Inngest background job setup for order sync and courier polling
+- **Next Up**: Phase 3 Analytics Dashboard
 
 ---
 
@@ -132,7 +133,7 @@
 - [x] [TASK-201] Courier status normalizer module (`mapStatus` for Pathao, Steadfast, RedX) + unit tests
 - [x] [TASK-202] WooCommerce REST API v3 connector (encrypted keys, order fetcher)
 - [x] [TASK-203] Shopify OAuth connector & webhook receivers
-- [TASK-204] Pathao, Steadfast, RedX webhook endpoints with signature validation
+- [x] [TASK-204] Pathao, Steadfast, RedX webhook endpoints with signature validation
 - [TASK-205] Inngest background job setup for order sync and courier polling
 
 ### Phase 3: Analytics Dashboard
