@@ -16,9 +16,3 @@ export interface TenantSummary {
   subscriptionStatus: SubscriptionStatus;
   userRole: TenantRole;
 }
-
-export interface InviteMemberInput {
-  email: string;
-  role: TenantRole;
-  name: string;
-}
