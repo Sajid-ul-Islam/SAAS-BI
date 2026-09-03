@@ -1,8 +1,8 @@
 # Project Tasks & Execution Roadmap
 
 ## Progress & Execution State
-- **Current Phase**: Phase 2: Integrations
-- **Status**: TASK-204 Complete (Pathao, Steadfast, and RedX webhook receiver routes with status normalization, transaction updates, and unit tests).
+- **Current Phase**: Phase 2 Integrations Completed 🚀 -> Moving to Phase 3: Analytics Dashboard
+- **Status**: PHASE 2 COMPLETE (100% of tickets TASK-201 to TASK-205 completed and verified: Courier Normalizer, WooCommerce REST API v3 Connector, Shopify OAuth Connector, Pathao/Steadfast/RedX Webhooks, Inngest Order Sync & Courier Polling workflows, 71 passing tests).
 - **Completed**:
   - [x] Initial architecture documentation (`/docs/ARCHITECTURE.md`)
   - [x] Initial data model & Prisma schema specification (`/docs/DATA_MODEL.md`)
@@ -18,8 +18,9 @@
   - [x] [TASK-202] WooCommerce REST API v3 connector (encrypted keys, order fetcher)
   - [x] [TASK-203] Shopify OAuth connector & webhook receivers
   - [x] [TASK-204] Pathao, Steadfast, RedX webhook endpoints with signature validation
-- **In Progress**: [TASK-205] Inngest background job setup for order sync and courier polling
-- **Next Up**: Phase 3 Analytics Dashboard
+  - [x] [TASK-205] Inngest background job setup for order sync and courier polling
+- **In Progress**: Phase 3 Analytics Dashboard
+- **Next Up**: [TASK-301] Order tracking view with status tabs, search, and date filters
 
 ---
 
@@ -134,7 +135,7 @@
 - [x] [TASK-202] WooCommerce REST API v3 connector (encrypted keys, order fetcher)
 - [x] [TASK-203] Shopify OAuth connector & webhook receivers
 - [x] [TASK-204] Pathao, Steadfast, RedX webhook endpoints with signature validation
-- [TASK-205] Inngest background job setup for order sync and courier polling
+- [x] [TASK-205] Inngest background job setup for order sync and courier polling
 
 ### Phase 3: Analytics Dashboard
 - [TASK-301] Order tracking view with status tabs, search, and date filters
