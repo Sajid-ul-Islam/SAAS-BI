@@ -22,3 +22,11 @@ flowchart LR
 ## 4. Environment Variables Required
 - `DATABASE_URL`
 - `ENCRYPTION_KEY`
+
+## 5. Testing Strategy
+- Unit tests for courier status mapping (`courier_normalizer.test.ts`).
+- Connector HMAC and signature verification tests (`woocommerce_connector.test.ts`, `shopify_connector.test.ts`, `webhooks.test.ts`).
+
+## 6. Known Limitations
+- Background webhook retry backoff is handled upstream by Inngest; dropped webhooks without courier retry will be caught by the periodic reconciliation poller.
+

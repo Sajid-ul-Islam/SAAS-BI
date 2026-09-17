@@ -29,4 +29,8 @@ flowchart LR
 - `SSLCOMMERZ_IS_SANDBOX`
 
 ## 5. Testing Strategy
-- Unit tests for plan quota validation and SSLCommerz redirect URL generation.
+- Unit tests for plan quota validation and SSLCommerz redirect URL generation (`billing.test.ts`, `billing_routes.test.ts`).
+
+## 6. Known Limitations
+- SSLCommerz sandbox mode is simulated in local development environments when valid sandbox credentials are not provisioned.
+

@@ -22,4 +22,8 @@ flowchart LR
 - `DATABASE_URL`
 
 ## 5. Testing Strategy
-- Unit tests for KPI calculations and financial accuracy.
+- Unit tests for KPI calculations and financial accuracy (`analytics_aggregates.test.ts`).
+
+## 6. Known Limitations
+- Time-series aggregations default to tenant local timezone (Asia/Dhaka, UTC+6). Cross-timezone merchants are aggregated under Dhaka standard time.
+

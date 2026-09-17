@@ -30,4 +30,8 @@ flowchart TD
 - `OPENAI_API_KEY`
 
 ## 5. Testing Strategy
-- Unit tests for prompt hash stability and daily token quota enforcement.
+- Unit tests for prompt hash stability and daily token quota enforcement (`ai.test.ts`, `ai_engine.test.ts`).
+
+## 6. Known Limitations
+- When `OPENAI_API_KEY` is not present, deterministic mock heuristic responses are returned for development safety.
+
