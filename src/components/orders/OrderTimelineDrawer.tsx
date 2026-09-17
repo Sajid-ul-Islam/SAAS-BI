@@ -14,10 +14,13 @@ import {
   Copy,
   Check,
   Package,
+  Send,
+  Loader2,
 } from 'lucide-react';
 import { formatBDT } from '@/shared/utils/currency';
 import { OrderWithRelations } from '@/modules/orders/orders.types';
 import { CourierProvider, NormalizedOrderStatus } from '@prisma/client';
+import { useRouter } from 'next/navigation';
 
 interface OrderTimelineDrawerProps {
   order: OrderWithRelations | null;
@@ -26,7 +29,35 @@ interface OrderTimelineDrawerProps {
 }
 
 export function OrderTimelineDrawer({ order, isOpen, onClose }: OrderTimelineDrawerProps) {
+  const router = useRouter();
   const [copied, setCopied] = React.useState(false);
+  const [isDispatching, setIsDispatching] = React.useState(false);
+  const [dispatchMsg, setDispatchMsg] = React.useState<string | null>(null);
+
+  const handleDispatch = async (courier: 'PATHAO' | 'STEADFAST' | 'REDX') => {
+    if (!order) return;
+    setIsDispatching(true);
+    setDispatchMsg(null);
+    try {
+      const res = await fetch('/api/orders/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.id, courier }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setDispatchMsg(data.message);
+        router.refresh();
+      } else {
+        setDispatchMsg(data.error || 'Failed to dispatch');
+      }
+    } catch {
+      setDispatchMsg('Network error while dispatching');
+    } finally {
+      setIsDispatching(false);
+    }
+  };
+
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -278,7 +309,44 @@ export function OrderTimelineDrawer({ order, isOpen, onClose }: OrderTimelineDra
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-slate-400 italic">No tracking code registered for this order yet.</p>
+              <div className="space-y-3 pt-1">
+                <p className="text-xs text-slate-500">Ready to dispatch this parcel to a courier?</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleDispatch('PATHAO')}
+                    disabled={isDispatching}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-red-700 disabled:opacity-50 transition"
+                  >
+                    {isDispatching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                    Send via Pathao
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDispatch('STEADFAST')}
+                    disabled={isDispatching}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-50 transition"
+                  >
+                    {isDispatching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                    Send via Steadfast
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDispatch('REDX')}
+                    disabled={isDispatching}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-rose-700 disabled:opacity-50 transition"
+                  >
+                    {isDispatching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                    Send via RedX
+                  </button>
+                </div>
+
+                {dispatchMsg && (
+                  <div className="rounded-lg bg-indigo-50 p-2.5 text-[11px] font-medium text-indigo-900 border border-indigo-200">
+                    {dispatchMsg}
+                  </div>
+                )}
+              </div>
             )}
           </div>
 

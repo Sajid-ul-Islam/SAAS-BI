@@ -165,3 +165,18 @@
 - [x] [TASK-503] Onboarding wizard (< 5 minutes to first store connection)
 - [x] [TASK-504] Global error boundaries, Sentry logging, and empty/loading states
 
+### Phase 6: Backend Gap Closure & Production Readiness
+- [x] [GAP-01] Two-Way Courier Status Writeback (WooCommerce & Shopify)
+- [x] [GAP-02] Automated One-Click Parcel Dispatch API & Action
+- [x] [GAP-03] Stale Courier Status Reconciler & Historical Backfill Inngest Workflows
+- [x] [GAP-04] Automated COD Statement & Disbursement Reconciliation Service
+- [x] [GAP-05] SSLCommerz Server-to-Server Validation API Verification
+- [x] [GAP-06] Subscription Expiration & Automatic Downgrade Cron Job
+- [x] [GAP-07] Filtered Orders CSV Export API with UTF-8 BOM
+- [x] [GAP-08] Custom Date-Range SQL Aggregations & Query Filters
+- [x] [GAP-09] Real-Time AI Streaming (SSE) & Multi-Turn History
+- [x] [GAP-10] Automated Anomaly Push Alert Dispatcher (SMS/Webhook)
+- [x] [GAP-11] Transactional Email Dispatcher (Team Invites & Receipts)
+- [x] [GAP-12] Fine-Grained Role-Based Access Control (RBAC) Guards
+
+

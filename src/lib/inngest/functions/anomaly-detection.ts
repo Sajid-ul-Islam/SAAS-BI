@@ -33,6 +33,16 @@ export const detectAnomaliesCron = inngest.createFunction(
             merchantName: tenant.name,
             anomaliesCount: highSeverity.length,
           });
+
+          const { notificationDispatcher } = await import('@/lib/notifications');
+          await notificationDispatcher.dispatchAlert({
+            tenantId: tenant.id,
+            type: 'ANOMALY_RETURN_SPIKE',
+            title: `Urgent Alert: Return Spike detected for ${tenant.name}`,
+            message: highSeverity[0]?.description ?? 'Logistics return rate exceeded safety threshold',
+            severity: 'warning',
+            metadata: { anomalyCount: highSeverity.length },
+          });
         }
 
         summary[tenant.id] = anomalies.length;

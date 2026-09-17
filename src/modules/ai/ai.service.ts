@@ -55,7 +55,8 @@ export class AiService {
   async executeQuery(
     tenantId: string,
     query: string,
-    contextSummary?: string
+    contextSummary?: string,
+    conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>
   ): Promise<AiQueryResult> {
     const startTime = Date.now();
 
@@ -66,9 +67,14 @@ export class AiService {
       analyticsService.getRegionalDistribution(tenantId),
     ]);
 
+    const historyContext = conversationHistory && conversationHistory.length > 0
+      ? `\nPrior Thread: ${conversationHistory.map((h) => `${h.role}: ${h.content}`).join(' | ')}`
+      : '';
+
     const groundContext =
-      contextSummary ||
-      `Revenue: ${kpis.totalRevenueBDT} BDT, Orders: ${kpis.totalOrders}, DeliveryRate: ${kpis.deliverySuccessRatePercentage}%, ReturnRate: ${kpis.returnRatePercentage}%, PendingCOD: ${kpis.pendingCodBDT} BDT.`;
+      (contextSummary ||
+      `Revenue: ${kpis.totalRevenueBDT} BDT, Orders: ${kpis.totalOrders}, DeliveryRate: ${kpis.deliverySuccessRatePercentage}%, ReturnRate: ${kpis.returnRatePercentage}%, PendingCOD: ${kpis.pendingCodBDT} BDT.`) +
+      historyContext;
 
     const contextHash = crypto
       .createHash('sha256')
@@ -77,6 +83,7 @@ export class AiService {
       .substring(0, 16);
 
     const promptHash = this.computePromptHash(tenantId, query, contextHash);
+
 
     // 2. Check response cache first
     const cached = await aiRepository.getCachedResponse(tenantId, promptHash);

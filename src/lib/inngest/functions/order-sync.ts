@@ -91,3 +91,46 @@ export const syncOrders = inngest.createFunction(
     };
   }
 );
+
+/**
+ * Historical order backfill job stepping through pages with cursor & rate limits
+ */
+export const backfillStoreOrders = inngest.createFunction(
+  {
+    id: 'backfill-store-orders',
+    concurrency: { limit: 2, key: 'event.data.tenantId' },
+    retries: 3,
+  },
+  { event: 'integration/orders.backfill' },
+  async ({ event, step }) => {
+    const { tenantId, storeId, maxPages = 5, perPage = 50 } = event.data;
+
+    let totalBackfilled = 0;
+
+    for (let page = 1; page <= maxPages; page++) {
+      const orders = await step.run(`fetch-page-${page}`, async () => {
+        const store = await prisma.store.findFirst({
+          where: { id: storeId, tenantId },
+        });
+        if (!store || store.platform !== StorePlatform.WOOCOMMERCE) return [];
+        const creds = wooCommerceConnector.deserializeCredentials(store.credentialsEncrypted);
+        return wooCommerceConnector.fetchOrders(store.storeUrl, creds, { page, perPage });
+      });
+
+      if (orders.length === 0) break;
+
+      const normalized = normalizeStoreOrders(tenantId, storeId, orders);
+      const count = await step.run(`persist-page-${page}`, async () => {
+        return persistStoreOrders(normalized);
+      });
+
+      totalBackfilled += count;
+
+      // Small pause between pages to respect storefront rate limits
+      await step.sleep(`pause-after-page-${page}`, '2s');
+    }
+
+    return { totalBackfilled, tenantId, storeId };
+  }
+);
+

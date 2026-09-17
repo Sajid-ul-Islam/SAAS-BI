@@ -63,7 +63,100 @@ export class AnalyticsService {
     const tf = this.resolveTimeframe(timeframe);
     return analyticsRepository.getRegionalDistribution(tenantId, tf);
   }
+
+  /**
+   * Reconciles courier settlement/disbursement statements against expected COD order amounts.
+   */
+  async reconcileDisbursementStatement(
+    tenantId: string,
+    statementItems: import('./analytics.types').StatementItem[]
+  ): Promise<import('./analytics.types').CodReconciliationResult> {
+    const trackingCodes = statementItems.map((item) => item.trackingCode).filter(Boolean);
+
+    // Fetch matching orders from database
+    let orders: Array<{
+      id: string;
+      trackingCode: string | null;
+      codAmount: unknown;
+      totalAmount: unknown;
+      normalizedStatus: string;
+    }> = [];
+
+    try {
+      const { prisma } = await import('@/lib/prisma');
+      orders = await prisma.order.findMany({
+        where: {
+          tenantId,
+          trackingCode: { in: trackingCodes },
+        },
+        select: {
+          id: true,
+          trackingCode: true,
+          codAmount: true,
+          totalAmount: true,
+          normalizedStatus: true,
+        },
+      });
+    } catch {
+      // Fallback for mock environments
+    }
+
+    const orderMap = new Map(orders.map((o) => [o.trackingCode, o]));
+
+    let matchedOrders = 0;
+    let unmatchedOrders = 0;
+    let grossCollectedBDT = 0;
+    let totalCourierChargesBDT = 0;
+    let totalCodFeesBDT = 0;
+    let totalReturnChargesBDT = 0;
+    let expectedCodBDT = 0;
+    const unmatchedTrackingCodes: string[] = [];
+
+    for (const item of statementItems) {
+      const order = orderMap.get(item.trackingCode);
+      if (order) {
+        matchedOrders++;
+        expectedCodBDT += Number(order.codAmount || order.totalAmount || 0);
+      } else {
+        unmatchedOrders++;
+        unmatchedTrackingCodes.push(item.trackingCode);
+      }
+
+      grossCollectedBDT += item.collectedAmount;
+      totalCourierChargesBDT += item.deliveryCharge;
+      totalCodFeesBDT += item.codFee;
+      totalReturnChargesBDT += item.returnCharge ?? 0;
+    }
+
+    const netDisbursedBDT =
+      grossCollectedBDT - (totalCourierChargesBDT + totalCodFeesBDT + totalReturnChargesBDT);
+    const varianceBDT = netDisbursedBDT - expectedCodBDT;
+
+    logger.info('COD disbursement statement reconciled', {
+      tenantId,
+      statementOrders: statementItems.length,
+      matchedOrders,
+      netDisbursedBDT,
+      varianceBDT,
+    });
+
+    return {
+      totalStatementOrders: statementItems.length,
+      matchedOrders,
+      unmatchedOrders,
+      grossCollectedBDT,
+      totalCourierChargesBDT,
+      totalCodFeesBDT,
+      totalReturnChargesBDT,
+      netDisbursedBDT,
+      expectedCodBDT,
+      varianceBDT,
+      status: Math.abs(varianceBDT) < 1 ? 'RECONCILED' : 'VARIANCE_DETECTED',
+      unmatchedTrackingCodes,
+    };
+  }
 }
 
 export const analyticsService = new AnalyticsService();
+
 

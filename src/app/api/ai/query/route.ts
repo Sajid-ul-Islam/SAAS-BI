@@ -23,7 +23,39 @@ export async function POST(req: NextRequest) {
     }
 
     const { query } = parseResult.data;
-    const result = await aiService.executeQuery(tenantId, query);
+    const conversationHistory = Array.isArray(body.conversationHistory) ? body.conversationHistory : undefined;
+    const shouldStream = req.nextUrl.searchParams.get('stream') === 'true' || Boolean(body.stream);
+    const result = await aiService.executeQuery(tenantId, query, undefined, conversationHistory);
+
+
+    if (shouldStream) {
+      const encoder = new TextEncoder();
+      const chunks = result.answer.split(' ');
+      const stream = new ReadableStream({
+        async start(controller) {
+          for (let i = 0; i < chunks.length; i++) {
+            const word = chunks[i] + (i < chunks.length - 1 ? ' ' : '');
+            const payload = JSON.stringify({
+              chunk: word,
+              cached: result.cached,
+              tokensUsed: result.tokensUsed,
+            });
+            controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
+            await new Promise((r) => setTimeout(r, 15));
+          }
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        },
+      });
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,

@@ -51,3 +51,28 @@ export interface DistrictDeliveryMetric {
   returnCount: number;
   returnRatePercentage: number;
 }
+
+export interface StatementItem {
+  trackingCode: string;
+  orderNumber?: string;
+  collectedAmount: number;
+  deliveryCharge: number;
+  codFee: number;
+  returnCharge?: number;
+}
+
+export interface CodReconciliationResult {
+  totalStatementOrders: number;
+  matchedOrders: number;
+  unmatchedOrders: number;
+  grossCollectedBDT: number;
+  totalCourierChargesBDT: number;
+  totalCodFeesBDT: number;
+  totalReturnChargesBDT: number;
+  netDisbursedBDT: number;
+  expectedCodBDT: number;
+  varianceBDT: number;
+  status: 'RECONCILED' | 'VARIANCE_DETECTED';
+  unmatchedTrackingCodes: string[];
+}
+

@@ -2,7 +2,7 @@
 
 import React, { useTransition } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { Search, RotateCcw, Truck, MapPin, Calendar } from 'lucide-react';
+import { Search, RotateCcw, Truck, MapPin, Calendar, Download } from 'lucide-react';
 import { BANGLADESH_DISTRICTS } from '@/modules/orders/orders.types';
 import { CourierProvider, NormalizedOrderStatus } from '@prisma/client';
 
@@ -167,6 +167,17 @@ export function OrdersFilterBar() {
             </select>
           </div>
 
+          {/* Export CSV */}
+          <a
+            href={`/api/orders/export?${searchParams.toString()}`}
+            download
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-xs"
+            title="Download filtered orders as CSV for Excel"
+          >
+            <Download className="h-3.5 w-3.5 text-slate-500" />
+            Export CSV
+          </a>
+
           {/* Reset Filters */}
           {isFiltered && (
             <button
@@ -184,3 +195,4 @@ export function OrdersFilterBar() {
     </div>
   );
 }
+

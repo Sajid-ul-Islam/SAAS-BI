@@ -5,6 +5,7 @@ import { OrdersFilterBar } from '@/components/orders/OrdersFilterBar';
 import { OrdersViewClient } from '@/components/orders/OrdersViewClient';
 import { OrdersPagination } from '@/components/orders/OrdersPagination';
 import { NormalizedOrderStatus } from '@prisma/client';
+import { Download } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,6 +77,16 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          <a
+            href={`/api/orders/export?${new URLSearchParams(
+              Object.entries(resolvedParams).filter(([_, v]) => Boolean(v)) as [string, string][]
+            ).toString()}`}
+            download
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition"
+          >
+            <Download className="h-3.5 w-3.5 text-slate-500" /> Export CSV
+          </a>
+
           <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             Active Webhook Sync

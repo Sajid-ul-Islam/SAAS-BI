@@ -78,3 +78,45 @@ export const pollCourierStatus = inngest.createFunction(
     return updateResult;
   }
 );
+
+/**
+ * Scheduled cron to reconcile stale orders stuck in transit (>72h)
+ */
+export const reconcileStaleOrdersCron = inngest.createFunction(
+  {
+    id: 'reconcile-stale-courier-orders',
+    concurrency: { limit: 2 },
+  },
+  { cron: '0 */6 * * *' },
+  async ({ step }) => {
+    const staleThreshold = new Date(Date.now() - 72 * 60 * 60 * 1000);
+
+    const tenantsWithStaleOrders = await step.run('find-tenants-with-stale-orders', async () => {
+      const orders = await prisma.order.findMany({
+        where: {
+          normalizedStatus: {
+            in: [NormalizedOrderStatus.shipped, NormalizedOrderStatus.on_the_way],
+          },
+          updatedAt: { lte: staleThreshold },
+          trackingCode: { not: null },
+        },
+        select: { tenantId: true },
+        distinct: ['tenantId'],
+        take: 20,
+      });
+      return orders.map((o) => o.tenantId);
+    });
+
+    for (const tenantId of tenantsWithStaleOrders) {
+      await step.run(`trigger-poll-${tenantId}`, async () => {
+        await inngest.send({
+          name: 'courier/status.poll',
+          data: { tenantId },
+        });
+      });
+    }
+
+    return { reconciledTenants: tenantsWithStaleOrders.length };
+  }
+);
+

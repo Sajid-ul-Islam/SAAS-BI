@@ -106,8 +106,13 @@ export class ShopifyConnector {
    * Deserializes Shopify credentials from encrypted string.
    */
   deserializeCredentials(encrypted: string): ShopifyCredentials {
-    const raw = decryptSecret(encrypted);
-    return JSON.parse(raw) as ShopifyCredentials;
+    try {
+      const raw = decryptSecret(encrypted);
+      if (!raw) return { accessToken: '', shopDomain: '' };
+      return JSON.parse(raw) as ShopifyCredentials;
+    } catch {
+      return { accessToken: '', shopDomain: '' };
+    }
   }
 
   /**
@@ -177,6 +182,82 @@ export class ShopifyConnector {
       rawPayload: raw as unknown as Record<string, unknown>,
     };
   }
+
+  /**
+   * Exchanges temporary OAuth code for permanent offline access token.
+   */
+  async exchangeAccessToken(
+    shopDomain: string,
+    apiKey: string,
+    apiSecret: string,
+    code: string
+  ): Promise<{ accessToken: string; scope: string }> {
+    const cleanDomain = shopDomain.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    const tokenUrl = `https://${cleanDomain}/admin/oauth/access_token`;
+
+    const res = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: apiKey,
+        client_secret: apiSecret,
+        code,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Shopify OAuth token exchange failed with status ${res.status}`);
+    }
+
+    const data = (await res.json()) as { access_token: string; scope: string };
+    return {
+      accessToken: data.access_token,
+      scope: data.scope,
+    };
+  }
+
+  /**
+   * Two-way status writeback: Creates or updates a fulfillment on Shopify with courier tracking.
+   */
+  async fulfillOrderWithTracking(
+    shopDomain: string,
+    accessToken: string,
+    externalOrderId: string,
+    trackingNumber: string,
+    trackingCompany: string
+  ): Promise<{ success: boolean; fulfillmentId?: string | number }> {
+    const cleanDomain = shopDomain.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    const url = `https://${cleanDomain}/admin/api/2024-01/orders/${externalOrderId}/fulfillments.json`;
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-Shopify-Access-Token': accessToken,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fulfillment: {
+            tracking_number: trackingNumber,
+            tracking_company: trackingCompany,
+            notify_customer: true,
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        return { success: false };
+      }
+
+      const data = (await res.json()) as { fulfillment?: { id: number | string } };
+      return { success: true, fulfillmentId: data.fulfillment?.id };
+    } catch {
+      return { success: false };
+    }
+  }
 }
 
 export const shopifyConnector = new ShopifyConnector();
+

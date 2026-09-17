@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { billingRepository } from '@/modules/billing/billing.repository';
-import { PLAN_CONFIG } from '@/modules/billing/billing.service';
+import { billingService, PLAN_CONFIG } from '@/modules/billing/billing.service';
 import { sslCommerzIpnSchema } from '@/modules/billing/billing.schema';
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
@@ -22,14 +22,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid IPN payload' }, { status: 400 });
     }
 
-    const { tran_id, status, amount } = parseResult.data;
+    const { tran_id, status, amount, val_id } = parseResult.data;
 
-    logger.info('SSLCommerz IPN notification received', { tran_id, status, amount });
+    logger.info('SSLCommerz IPN notification received', { tran_id, status, amount, val_id });
 
-    // Validate payment status
-    if (status === 'VALID' || status === 'VALIDATED') {
+    // 1. Perform server-to-server transaction validation with SSLCommerz if val_id present
+    let isServerValidated = true;
+    if (val_id) {
+      const validation = await billingService.validateSslCommerzTransaction(val_id);
+      isServerValidated = validation.isValid;
+      logger.info('SSLCommerz server-to-server validation result', { val_id, isValid: isServerValidated });
+    }
+
+    // 2. Validate payment status
+    if ((status === 'VALID' || status === 'VALIDATED') && isServerValidated) {
       // Extract tenantId from tran_id or payload
-      // Convention: SSL_SESSION_{tenantIdPrefix}_{timestamp} or parse custom field
       const tenant = await prisma.tenant.findFirst({
         where: { status: 'active' },
         select: { id: true },
@@ -67,6 +74,20 @@ export async function POST(req: NextRequest) {
           tenantId: tenant.id,
           tier: upgradedTier,
         });
+
+        // Dispatch email receipt
+        try {
+          const { emailDispatcher } = await import('@/lib/email');
+          await emailDispatcher.sendPaymentReceiptEmail({
+            to: 'merchant@dhakafashion.com',
+            tenantName: 'Merchant Store',
+            amountBDT: amountNum,
+            planTier: upgradedTier,
+            tranId: tran_id,
+          });
+        } catch (e) {
+          logger.warn('Failed to send email receipt', { error: e });
+        }
       }
     }
 

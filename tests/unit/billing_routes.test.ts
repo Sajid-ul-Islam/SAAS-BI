@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { POST as checkoutHandler } from '../../src/app/api/billing/checkout/route';
 import { POST as ipnHandler } from '../../src/app/api/billing/ipn/route';
 import { billingRepository } from '../../src/modules/billing/billing.repository';
+import { billingService } from '../../src/modules/billing/billing.service';
 import { ErrorTracker } from '../../src/lib/error-tracker';
 import { logger } from '../../src/lib/logger';
 import { prisma } from '../../src/lib/prisma';
@@ -35,6 +36,7 @@ describe('Billing Checkout & IPN Routes', () => {
     const updateSpy = vi.spyOn(billingRepository, 'updateSubscription').mockResolvedValue({} as any);
     const tenantSpy = vi.spyOn(prisma.tenant, 'findFirst').mockResolvedValue({ id: 'tenant-123' } as any);
     const eventSpy = vi.spyOn(prisma.webhookEvent, 'create').mockResolvedValue({} as any);
+    const valSpy = vi.spyOn(billingService, 'validateSslCommerzTransaction').mockResolvedValue({ isValid: true, status: 'VALID' });
 
     const formData = new FormData();
     formData.append('tran_id', 'SSL_SESSION_123_456');
@@ -57,6 +59,7 @@ describe('Billing Checkout & IPN Routes', () => {
     updateSpy.mockRestore();
     tenantSpy.mockRestore();
     eventSpy.mockRestore();
+    valSpy.mockRestore();
   });
 
   it('captures structured exceptions via ErrorTracker without throwing', () => {

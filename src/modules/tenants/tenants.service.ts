@@ -71,3 +71,32 @@ export async function getTenantSummary(tenantId: string, userId: string): Promis
     userRole: user.role ?? TenantRole.MEMBER,
   };
 }
+
+const ROLE_HIERARCHY: Record<TenantRole, number> = {
+  [TenantRole.OWNER]: 3,
+  [TenantRole.ADMIN]: 2,
+  [TenantRole.MEMBER]: 1,
+};
+
+export class InsufficientRoleError extends Error {
+  constructor(message = 'Insufficient permissions for this operation') {
+    super(message);
+    this.name = 'InsufficientRoleError';
+  }
+}
+
+/**
+ * Validates that user has sufficient role permissions.
+ */
+export function assertRole(userRole: TenantRole, requiredRole: TenantRole): void {
+  const userRank = ROLE_HIERARCHY[userRole] ?? 0;
+  const requiredRank = ROLE_HIERARCHY[requiredRole] ?? 0;
+
+  if (userRank < requiredRank) {
+    logger.warn('Role authorization check failed', { userRole, requiredRole });
+    throw new InsufficientRoleError(
+      `Permission denied: requires ${requiredRole} role or higher, current role is ${userRole}`
+    );
+  }
+}
+

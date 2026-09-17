@@ -40,8 +40,13 @@ export class WooCommerceConnector {
    * Decrypts WooCommerce credentials from stored string.
    */
   deserializeCredentials(encrypted: string): WooCommerceCredentials {
-    const raw = decryptSecret(encrypted);
-    return JSON.parse(raw) as WooCommerceCredentials;
+    try {
+      const raw = decryptSecret(encrypted);
+      if (!raw) return { consumerKey: '', consumerSecret: '' };
+      return JSON.parse(raw) as WooCommerceCredentials;
+    } catch {
+      return { consumerKey: '', consumerSecret: '' };
+    }
   }
 
   /**
@@ -165,6 +170,76 @@ export class WooCommerceConnector {
       throw err;
     }
   }
+
+  /**
+   * Two-way status writeback: Pushes courier tracking and note back to WooCommerce store.
+   */
+  async updateOrderTracking(
+    storeUrl: string,
+    creds: WooCommerceCredentials,
+    externalOrderId: string,
+    trackingCode: string,
+    courierName: string,
+    statusNote?: string
+  ): Promise<{ success: boolean; noteId?: number }> {
+    const base = storeUrl.replace(/\/+$/, '');
+    const authHeader = `Basic ${Buffer.from(
+      `${creds.consumerKey}:${creds.consumerSecret}`
+    ).toString('base64')}`;
+
+    try {
+      // 1. Post an order note visible to store admin and tracking systems
+      const noteUrl = `${base}/wp-json/wc/v3/orders/${externalOrderId}/notes`;
+      const noteContent = statusNote ?? `Dispatched via ${courierName}. Courier Tracking Code: ${trackingCode}`;
+
+      const res = await fetch(noteUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          note: noteContent,
+          customer_note: true,
+        }),
+      });
+
+      if (!res.ok) {
+        logger.warn('Failed to post order note to WooCommerce', {
+          orderId: externalOrderId,
+          status: res.status,
+        });
+        return { success: false };
+      }
+
+      const noteData = (await res.json()) as { id?: number };
+
+      // 2. Update order meta data with tracking code
+      const updateUrl = `${base}/wp-json/wc/v3/orders/${externalOrderId}`;
+      await fetch(updateUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          meta_data: [
+            { key: '_courier_tracking_code', value: trackingCode },
+            { key: '_courier_provider', value: courierName },
+          ],
+        }),
+      });
+
+      return { success: true, noteId: noteData.id };
+    } catch (err) {
+      logger.error('Error during two-way writeback to WooCommerce', {
+        orderId: externalOrderId,
+        err,
+      });
+      return { success: false };
+    }
+  }
 }
 
 export const wooCommerceConnector = new WooCommerceConnector();
+
