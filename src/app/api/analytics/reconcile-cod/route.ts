@@ -17,6 +17,8 @@ const reconcileRequestSchema = z.object({
   items: z.array(statementItemSchema).min(1).max(1000),
 });
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const tenantId = await resolveActiveTenantId();

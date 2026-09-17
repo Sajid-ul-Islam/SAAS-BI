@@ -14,6 +14,8 @@ const dispatchSchema = z.object({
   weightKg: z.number().positive().default(0.5),
 });
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const tenantId = await resolveActiveTenantId();

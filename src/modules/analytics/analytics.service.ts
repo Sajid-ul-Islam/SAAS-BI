@@ -36,8 +36,18 @@ export class AnalyticsService {
     timeframe?: AnalyticsTimeframe | AnalyticsTimeframeOption
   ): Promise<KpiMetrics> {
     const tf = this.resolveTimeframe(timeframe);
-    logger.info('Computing merchant KPIs via SQL aggregates', { tenantId, timeframe });
-    return analyticsRepository.computeKpiMetrics(tenantId, tf);
+    const tfKey = tf ? `${tf.startDate.getTime()}_${tf.endDate.getTime()}` : 'all';
+    const cacheKey = `kpis:${tenantId}:${tfKey}`;
+
+    const { getOrSetCache } = await import('@/lib/cache');
+    return getOrSetCache(
+      cacheKey,
+      () => {
+        logger.info('Computing merchant KPIs via SQL aggregates (cache miss)', { tenantId, timeframe });
+        return analyticsRepository.computeKpiMetrics(tenantId, tf);
+      },
+      60 // 60-second TTL
+    );
   }
 
   async getDailySalesTrend(

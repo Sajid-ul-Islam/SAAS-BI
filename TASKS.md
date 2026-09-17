@@ -179,4 +179,14 @@
 - [x] [GAP-11] Transactional Email Dispatcher (Team Invites & Receipts)
 - [x] [GAP-12] Fine-Grained Role-Based Access Control (RBAC) Guards
 
+### Phase 7: Production Infrastructure & Operations
+- [ ] [INFRA-701] Distributed Redis / Upstash Caching Layer & Invalidation (`src/lib/cache.ts`)
+- [ ] [INFRA-702] Production Bangladeshi SMS Gateway Client (Greenweb & Onnorokom SMS)
+- [ ] [INFRA-703] Production HTML Email Templates & Multi-Provider Engine
+- [ ] [INFRA-704] Healthcheck & Diagnostic API Route (`/api/health`)
+- [ ] [INFRA-705] Docker & Local Dev Stack (`Dockerfile`, `docker-compose.yml`, `.dockerignore`)
+- [ ] [INFRA-706] Automated CI/CD Workflow (`.github/workflows/ci.yml`)
+- [ ] [INFRA-707] Production Infrastructure Guide (`docs/INFRASTRUCTURE.md`)
+
+
 
