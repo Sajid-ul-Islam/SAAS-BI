@@ -1,8 +1,8 @@
 # Project Tasks & Execution Roadmap
 
 ## Progress & Execution State
-- **Current Phase**: Phase 2 Integrations Completed 🚀 -> Moving to Phase 3: Analytics Dashboard
-- **Status**: PHASE 2 COMPLETE (100% of tickets TASK-201 to TASK-205 completed and verified: Courier Normalizer, WooCommerce REST API v3 Connector, Shopify OAuth Connector, Pathao/Steadfast/RedX Webhooks, Inngest Order Sync & Courier Polling workflows, 71 passing tests).
+- **Current Phase**: Phase 3 Analytics Dashboard Completed 🚀 -> Moving to Phase 4: AI Layer
+- **Status**: PHASE 3 COMPLETE (100% of tickets TASK-301 to TASK-305 completed and verified: Order Tracking view with 64 district filter & status tabs, SQL-first KPI metrics with BDT formatting, Order Status Timeline Drawer with audit trail, Server-side pagination with URL query sync, Recharts sales trend, courier performance comparison, regional distribution, 79 passing tests, Next.js 15 production build passing).
 - **Completed**:
   - [x] Initial architecture documentation (`/docs/ARCHITECTURE.md`)
   - [x] Initial data model & Prisma schema specification (`/docs/DATA_MODEL.md`)
@@ -19,8 +19,13 @@
   - [x] [TASK-203] Shopify OAuth connector & webhook receivers
   - [x] [TASK-204] Pathao, Steadfast, RedX webhook endpoints with signature validation
   - [x] [TASK-205] Inngest background job setup for order sync and courier polling
-- **In Progress**: Phase 3 Analytics Dashboard
-- **Next Up**: [TASK-301] Order tracking view with status tabs, search, and date filters
+  - [x] [TASK-301] Order tracking view with status tabs, search, and date filters
+  - [x] [TASK-302] SQL-first KPI cards (Revenue, AOV, Delivery Rate, Return Rate, COD Conversion)
+  - [x] [TASK-303] Order status timeline modal / drawer
+  - [x] [TASK-304] Server-side pagination & URL query state
+  - [x] [TASK-305] Recharts visualization components (sales trend, courier performance)
+- **In Progress**: Phase 4 AI Layer
+- **Next Up**: [TASK-401] Natural language query engine with SQL translation & guardrails
 
 ---
 
@@ -138,11 +143,11 @@
 - [x] [TASK-205] Inngest background job setup for order sync and courier polling
 
 ### Phase 3: Analytics Dashboard
-- [TASK-301] Order tracking view with status tabs, search, and date filters
-- [TASK-302] SQL-first KPI cards (Revenue, AOV, Delivery Rate, Return Rate, COD Conversion)
-- [TASK-303] Order status timeline modal / drawer
-- [TASK-304] Server-side pagination & URL query state
-- [TASK-305] Recharts visualization components (sales trend, courier performance)
+- [x] [TASK-301] Order tracking view with status tabs, search, and date filters
+- [x] [TASK-302] SQL-first KPI cards (Revenue, AOV, Delivery Rate, Return Rate, COD Conversion)
+- [x] [TASK-303] Order status timeline modal / drawer
+- [x] [TASK-304] Server-side pagination & URL query state
+- [x] [TASK-305] Recharts visualization components (sales trend, courier performance)
 
 ### Phase 4: AI Layer
 - [TASK-401] Natural language query engine with SQL translation & guardrails

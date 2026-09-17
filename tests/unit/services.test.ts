@@ -33,6 +33,7 @@ describe('Domain Services Unit Tests', () => {
         averageOrderValueBDT: 2450,
         deliverySuccessRatePercentage: 85,
         returnRatePercentage: 10,
+        codConversionRatePercentage: 81.6,
         totalCodCollectedBDT: 200000,
         pendingCodBDT: 45000,
       };

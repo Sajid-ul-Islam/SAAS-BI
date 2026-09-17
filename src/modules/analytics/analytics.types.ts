@@ -1,3 +1,5 @@
+export type AnalyticsTimeframeOption = '7d' | '30d' | '90d' | '1y' | 'all';
+
 export interface AnalyticsTimeframe {
   startDate: Date;
   endDate: Date;
@@ -12,8 +14,10 @@ export interface KpiMetrics {
   averageOrderValueBDT: number;
   deliverySuccessRatePercentage: number;
   returnRatePercentage: number;
+  codConversionRatePercentage: number;
   totalCodCollectedBDT: number;
   pendingCodBDT: number;
+  revenueGrowthPercentage?: number;
 }
 
 export interface CourierPerformanceMetric {
@@ -23,6 +27,21 @@ export interface CourierPerformanceMetric {
   returnedCount: number;
   deliveryRatePercentage: number;
   returnRatePercentage: number;
+}
+
+export interface DailySalesMetric {
+  date: string;
+  formattedDate: string;
+  revenueBDT: number;
+  orderCount: number;
+  deliveredCount: number;
+}
+
+export interface RegionalDistributionMetric {
+  region: string;
+  orderCount: number;
+  revenueBDT: number;
+  percentage: number;
 }
 
 export interface DistrictDeliveryMetric {

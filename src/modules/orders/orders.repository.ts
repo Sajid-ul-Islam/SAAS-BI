@@ -5,39 +5,60 @@ import {
   CreateOrderInput,
   OrderWithHistory,
 } from './orders.types';
-import { NormalizedOrderStatus, Order, Prisma } from '@prisma/client';
+import { CourierProvider, NormalizedOrderStatus, Order, Prisma } from '@prisma/client';
 
 export class OrdersRepository {
   async findPaginated(
     tenantId: string,
     params: OrderFilterParams
   ): Promise<PaginatedOrdersResult> {
-    const page = params.page ?? 1;
-    const limit = Math.min(params.limit ?? 20, 100);
+    const page = Math.max(1, params.page ?? 1);
+    const limit = Math.min(Math.max(1, params.limit ?? 20), 100);
     const skip = (page - 1) * limit;
 
     const where: Prisma.OrderWhereInput = {
       tenantId,
     };
 
-    if (params.status) {
-      where.normalizedStatus = params.status;
+    if (
+      params.status &&
+      params.status !== 'ALL' &&
+      Object.values(NormalizedOrderStatus).includes(params.status as NormalizedOrderStatus)
+    ) {
+      where.normalizedStatus = params.status as NormalizedOrderStatus;
     }
 
-    if (params.district) {
+    if (params.courier && params.courier !== 'ALL') {
+      const courierUpper = params.courier.toUpperCase();
+      if (courierUpper in CourierProvider) {
+        where.courierCredential = {
+          courier: courierUpper as CourierProvider,
+        };
+      }
+    }
+
+    if (params.district && params.district !== 'ALL') {
       where.customerDistrict = { contains: params.district, mode: 'insensitive' };
     }
 
-    if (params.search) {
+    if (params.search && params.search.trim()) {
+      const searchTerm = params.search.trim();
       where.OR = [
-        { orderNumber: { contains: params.search, mode: 'insensitive' } },
-        { customerName: { contains: params.search, mode: 'insensitive' } },
-        { customerPhone: { contains: params.search } },
-        { trackingCode: { contains: params.search, mode: 'insensitive' } },
+        { orderNumber: { contains: searchTerm, mode: 'insensitive' } },
+        { customerName: { contains: searchTerm, mode: 'insensitive' } },
+        { customerPhone: { contains: searchTerm } },
+        { trackingCode: { contains: searchTerm, mode: 'insensitive' } },
       ];
     }
 
-    if (params.startDate || params.endDate) {
+    const now = new Date();
+    if (params.timeframe && params.timeframe !== 'all') {
+      let days = 30;
+      if (params.timeframe === '7d') days = 7;
+      if (params.timeframe === '90d') days = 90;
+      const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+      where.orderedAt = { gte: startDate };
+    } else if (params.startDate || params.endDate) {
       where.orderedAt = {};
       if (params.startDate) where.orderedAt.gte = params.startDate;
       if (params.endDate) where.orderedAt.lte = params.endDate;
@@ -49,6 +70,14 @@ export class OrdersRepository {
         orderBy: { orderedAt: 'desc' },
         skip,
         take: limit,
+        include: {
+          store: {
+            select: { id: true, name: true, platform: true },
+          },
+          courierCredential: {
+            select: { id: true, courier: true },
+          },
+        },
       }),
       prisma.order.count({ where }),
     ]);
@@ -58,7 +87,7 @@ export class OrdersRepository {
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total / limit) || 1,
     };
   }
 
@@ -69,6 +98,12 @@ export class OrdersRepository {
         tenantId,
       },
       include: {
+        store: {
+          select: { id: true, name: true, platform: true },
+        },
+        courierCredential: {
+          select: { id: true, courier: true },
+        },
         statusHistory: {
           orderBy: { changedAt: 'asc' },
         },

@@ -1,3 +1,5 @@
+import React from 'react';
+import Link from 'next/link';
 import {
   Banknote,
   PackageCheck,
@@ -8,89 +10,81 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 import { formatBDT } from '@/shared/utils/currency';
+import { resolveActiveTenantId } from '@/lib/tenant-context';
+import { analyticsService } from '@/modules/analytics/analytics.service';
+import { ordersService } from '@/modules/orders/orders.service';
+import { CourierProvider, NormalizedOrderStatus } from '@prisma/client';
 
-export default function DashboardOverviewPage() {
-  const kpis = [
+export const dynamic = 'force-dynamic';
+
+export default async function DashboardOverviewPage() {
+  const tenantId = await resolveActiveTenantId();
+
+  const [kpis, recentOrdersData] = await Promise.all([
+    analyticsService.getDashboardKpis(tenantId),
+    ordersService.getOrders(tenantId, { limit: 5 }),
+  ]);
+
+  const kpiCards = [
     {
       title: 'Total Gross Revenue',
-      value: formatBDT(2458000),
-      compact: formatBDT(2458000, { compact: true }),
+      value: formatBDT(kpis.totalRevenueBDT),
+      compact: formatBDT(kpis.totalRevenueBDT, { compact: true }),
       change: '+18.4% vs last month',
       icon: Banknote,
       color: 'text-emerald-600 bg-emerald-50',
     },
     {
       title: 'Average Order Value (AOV)',
-      value: formatBDT(2850),
-      compact: formatBDT(2850, { compact: true }),
-      change: '+4.2% in Dhaka zone',
+      value: formatBDT(kpis.averageOrderValueBDT),
+      compact: formatBDT(kpis.averageOrderValueBDT, { compact: true }),
+      change: 'Calculated from deliveries',
       icon: ShoppingBag,
       color: 'text-indigo-600 bg-indigo-50',
     },
     {
       title: 'Delivery Success Rate',
-      value: '84.6%',
-      compact: '84.6%',
-      change: 'Pathao: 88% | Steadfast: 82%',
+      value: `${kpis.deliverySuccessRatePercentage}%`,
+      compact: `${kpis.deliverySuccessRatePercentage}%`,
+      change: `${kpis.deliveredOrders} of ${kpis.totalOrders} delivered`,
       icon: PackageCheck,
       color: 'text-blue-600 bg-blue-50',
     },
     {
-      title: 'Return / Return to Origin (RTO)',
-      value: '11.8%',
-      compact: '11.8%',
-      change: '-2.1% lower than market avg',
+      title: 'Return / RTO Rate',
+      value: `${kpis.returnRatePercentage}%`,
+      compact: `${kpis.returnRatePercentage}%`,
+      change: `${kpis.returnedOrders} returned orders`,
       icon: RotateCcw,
       color: 'text-rose-600 bg-rose-50',
     },
   ];
 
-  const recentOrders = [
-    {
-      id: 'WOO-1001',
-      orderNumber: '#DF-1001',
-      customer: 'Tanvir Hasan',
-      location: 'Dhanmondi, Dhaka',
-      courier: 'Pathao',
-      status: 'delivered',
-      statusColor: 'bg-emerald-100 text-emerald-800',
-      amount: 3450,
-      cod: 'Paid',
-    },
-    {
-      id: 'WOO-1002',
-      orderNumber: '#DF-1002',
-      customer: 'Sadia Islam',
-      location: 'Nasirabad, Chittagong',
-      courier: 'Steadfast',
-      status: 'on_the_way',
-      statusColor: 'bg-blue-100 text-blue-800',
-      amount: 5200,
-      cod: 'Pending (COD)',
-    },
-    {
-      id: 'WOO-1003',
-      orderNumber: '#DF-1003',
-      customer: 'Kamal Ahmed',
-      location: 'Zindabazar, Sylhet',
-      courier: 'Steadfast',
-      status: 'return',
-      statusColor: 'bg-rose-100 text-rose-800',
-      amount: 1850,
-      cod: 'Failed / Return',
-    },
-    {
-      id: 'WOO-1004',
-      orderNumber: '#DF-1004',
-      customer: 'Nusrat Jahan',
-      location: 'Uttara Sector 11, Dhaka',
-      courier: 'Pathao',
-      status: 'delivered',
-      statusColor: 'bg-emerald-100 text-emerald-800',
-      amount: 7600,
-      cod: 'Paid (bKash)',
-    },
-  ];
+  const getStatusColor = (status: NormalizedOrderStatus) => {
+    switch (status) {
+      case NormalizedOrderStatus.delivered:
+        return 'bg-emerald-100 text-emerald-800';
+      case NormalizedOrderStatus.on_the_way:
+        return 'bg-blue-100 text-blue-800';
+      case NormalizedOrderStatus.shipped:
+        return 'bg-indigo-100 text-indigo-800';
+      case NormalizedOrderStatus.processing:
+        return 'bg-amber-100 text-amber-800';
+      case NormalizedOrderStatus.return:
+        return 'bg-rose-100 text-rose-800';
+      case NormalizedOrderStatus.cancelled:
+        return 'bg-slate-200 text-slate-700';
+      default:
+        return 'bg-slate-100 text-slate-700';
+    }
+  };
+
+  const getCourierColor = (courier?: CourierProvider | null) => {
+    if (courier === CourierProvider.PATHAO) return 'text-red-600';
+    if (courier === CourierProvider.STEADFAST) return 'text-emerald-600';
+    if (courier === CourierProvider.REDX) return 'text-rose-600';
+    return 'text-slate-500';
+  };
 
   return (
     <div className="space-y-6">
@@ -112,12 +106,12 @@ export default function DashboardOverviewPage() {
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi) => {
+        {kpiCards.map((kpi) => {
           const Icon = kpi.icon;
           return (
             <div
               key={kpi.title}
-              className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+              className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-xs transition hover:shadow-md"
             >
               <div className="flex items-center justify-between">
                 <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
@@ -141,18 +135,18 @@ export default function DashboardOverviewPage() {
       </div>
 
       {/* Recent Orders Section */}
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white shadow-xs">
         <div className="flex items-center justify-between border-b border-slate-200 p-5">
           <div>
             <h3 className="text-base font-semibold text-slate-900">Recent Orders & Courier Tracking</h3>
             <p className="text-xs text-slate-500">Latest deliveries synced via webhook</p>
           </div>
-          <a
-            href="/dashboard/orders"
+          <Link
+            href="/orders"
             className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
           >
             View all orders <ArrowUpRight className="h-3.5 w-3.5" />
-          </a>
+          </Link>
         </div>
 
         <div className="overflow-x-auto">
@@ -160,44 +154,58 @@ export default function DashboardOverviewPage() {
             <thead className="border-b bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">
               <tr>
                 <th className="px-5 py-3.5">Order</th>
-                <th className="px-5 py-3.5">Customer & City</th>
+                <th className="px-5 py-3.5">Customer & District</th>
                 <th className="px-5 py-3.5">Courier</th>
                 <th className="px-5 py-3.5">Normalized Status</th>
                 <th className="px-5 py-3.5">Amount (BDT)</th>
                 <th className="px-5 py-3.5">Payment / COD</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
-              {recentOrders.map((ord) => (
-                <tr key={ord.id} className="hover:bg-slate-50 transition">
-                  <td className="px-5 py-4 font-medium text-slate-900">
-                    {ord.orderNumber}
-                  </td>
-                  <td className="px-5 py-4">
-                    <p className="font-medium text-slate-800">{ord.customer}</p>
-                    <p className="text-xs text-slate-500">{ord.location}</p>
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-700">
-                      <Truck className="h-3.5 w-3.5 text-slate-400" />
-                      {ord.courier}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${ord.statusColor}`}
-                    >
-                      {ord.status.replace(/_/g, ' ')}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 font-semibold text-slate-900">
-                    {formatBDT(ord.amount)}
-                  </td>
-                  <td className="px-5 py-4 text-xs font-medium text-slate-600">
-                    {ord.cod}
-                  </td>
-                </tr>
-              ))}
+            <tbody className="divide-y divide-slate-200 text-xs">
+              {recentOrdersData.orders.map((ord) => {
+                const courier = ord.courierCredential?.courier;
+                const statusColor = getStatusColor(ord.normalizedStatus);
+                const courierColor = getCourierColor(courier);
+
+                return (
+                  <tr key={ord.id} className="hover:bg-slate-50 transition">
+                    <td className="px-5 py-4 font-bold text-slate-900">
+                      {ord.orderNumber}
+                    </td>
+                    <td className="px-5 py-4">
+                      <p className="font-semibold text-slate-800">{ord.customerName}</p>
+                      <p className="text-xs text-slate-500">{ord.customerCity}, {ord.customerDistrict}</p>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold">
+                        <Truck className={`h-3.5 w-3.5 ${courierColor}`} />
+                        {courier ?? 'Pending'}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${statusColor}`}
+                      >
+                        {ord.normalizedStatus.replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 font-bold text-slate-900">
+                      {formatBDT(Number(ord.totalAmount))}
+                    </td>
+                    <td className="px-5 py-4 text-xs font-medium text-slate-600">
+                      <span
+                        className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                          ord.paymentStatus === 'paid'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-amber-100 text-amber-800'
+                        }`}
+                      >
+                        {ord.paymentStatus.toUpperCase()}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
