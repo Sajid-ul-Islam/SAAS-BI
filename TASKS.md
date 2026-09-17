@@ -160,7 +160,8 @@
 - [x] [TASK-404] Sales velocity forecasting per tenant
 
 ### Phase 5: Billing & Polish
-- [TASK-501] Subscription tiers & limit enforcement middleware
-- [TASK-502] SSLCommerz payment gateway integration
-- [TASK-503] Onboarding wizard (< 5 minutes to first store connection)
-- [TASK-504] Global error boundaries, Sentry logging, and empty/loading states
+- [x] [TASK-501] Subscription tiers & limit enforcement middleware
+- [x] [TASK-502] SSLCommerz payment gateway integration
+- [x] [TASK-503] Onboarding wizard (< 5 minutes to first store connection)
+- [x] [TASK-504] Global error boundaries, Sentry logging, and empty/loading states
+

@@ -1,9 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { aiService, QuotaExceededError } from '../../src/modules/ai/ai.service';
 import { aiRepository } from '../../src/modules/ai/ai.repository';
 import { analyticsService } from '../../src/modules/analytics/analytics.service';
 import { detectAnomaliesCron } from '../../src/lib/inngest/functions/anomaly-detection';
-import { prisma } from '../../src/lib/prisma';
 
 describe('AI Engine, Caching & Anomaly Detection Unit Tests', () => {
   const tenantId = '00000000-0000-0000-0000-000000000001';
@@ -175,7 +174,6 @@ describe('AI Engine, Caching & Anomaly Detection Unit Tests', () => {
 
   it('defines anomaly detection inngest function with expected triggers', () => {
     expect(detectAnomaliesCron).toBeDefined();
-    // @ts-expect-error Inngest internal id
-    expect(detectAnomaliesCron.id()).toBe('ai-anomaly-detection');
+    expect((detectAnomaliesCron as any).id()).toBe('ai-anomaly-detection');
   });
 });
