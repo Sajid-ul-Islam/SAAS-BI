@@ -22,21 +22,24 @@ export class NotificationDispatcher {
     });
 
     // In production with Bangladeshi SMS Gateway (e.g. Greenweb / Onnorokom)
-    const smsGatewayApiKey = process.env.SMS_GATEWAY_API_KEY;
-    if (smsGatewayApiKey && notification.severity === 'critical') {
-      try {
-        // e.g. POST https://api.greenweb.com.bd/api.php
-        logger.info('Dispatched SMS alert via Bangladeshi gateway to merchant phone', {
-          tenantId: notification.tenantId,
-        });
-      } catch (err) {
-        logger.warn('Failed to dispatch SMS alert', { err });
-      }
+    const alertPhone = process.env.MERCHANT_ALERT_PHONE ?? '01711000000';
+    if (notification.severity === 'critical') {
+      const { smsService } = await import('./sms');
+      const smsRes = await smsService.sendSms({
+        recipient: alertPhone,
+        message: `[SaaS BI Urgent] ${notification.title}: ${notification.message.substring(0, 100)}`,
+        tenantId: notification.tenantId,
+      });
+
+      return {
+        success: true,
+        channel: `SMS_${smsRes.provider}`,
+      };
     }
 
     return {
       success: true,
-      channel: smsGatewayApiKey ? 'SMS+LOG' : 'STRUCTURED_LOG',
+      channel: 'STRUCTURED_LOG',
     };
   }
 }
