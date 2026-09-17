@@ -1,8 +1,8 @@
 # Project Tasks & Execution Roadmap
 
 ## Progress & Execution State
-- **Current Phase**: Phase 3 Analytics Dashboard Completed 🚀 -> Moving to Phase 4: AI Layer
-- **Status**: PHASE 3 COMPLETE (100% of tickets TASK-301 to TASK-305 completed and verified: Order Tracking view with 64 district filter & status tabs, SQL-first KPI metrics with BDT formatting, Order Status Timeline Drawer with audit trail, Server-side pagination with URL query sync, Recharts sales trend, courier performance comparison, regional distribution, 79 passing tests, Next.js 15 production build passing).
+- **Current Phase**: Phase 4 AI Layer Completed 🚀 -> Moving to Phase 5: Billing & Polish
+- **Status**: PHASE 4 COMPLETE (100% of tickets TASK-401 to TASK-404 completed and verified: Natural language query engine with SQL context grounding, prompt caching with SHA-256 hash in `ai_cache`, 100K tokens/day quota meter & QuotaExceededError, automated anomaly detection Inngest cron job, 7-day sales velocity forecasting, 84 passing tests, Next.js 15 production build passing).
 - **Completed**:
   - [x] Initial architecture documentation (`/docs/ARCHITECTURE.md`)
   - [x] Initial data model & Prisma schema specification (`/docs/DATA_MODEL.md`)
@@ -24,8 +24,12 @@
   - [x] [TASK-303] Order status timeline modal / drawer
   - [x] [TASK-304] Server-side pagination & URL query state
   - [x] [TASK-305] Recharts visualization components (sales trend, courier performance)
-- **In Progress**: Phase 4 AI Layer
-- **Next Up**: [TASK-401] Natural language query engine with SQL translation & guardrails
+  - [x] [TASK-401] Natural language query engine with SQL translation & guardrails
+  - [x] [TASK-402] AI response caching (`ai_cache`) & daily token metering (100K token cap)
+  - [x] [TASK-403] Automated anomaly detection Inngest cron job
+  - [x] [TASK-404] Sales velocity forecasting per tenant
+- **In Progress**: Phase 5 Billing & Polish
+- **Next Up**: [TASK-501] Subscription tiers & limit enforcement middleware
 
 ---
 
@@ -150,10 +154,10 @@
 - [x] [TASK-305] Recharts visualization components (sales trend, courier performance)
 
 ### Phase 4: AI Layer
-- [TASK-401] Natural language query engine with SQL translation & guardrails
-- [TASK-402] AI response caching (`ai_cache`) & daily token metering (100K token cap)
-- [TASK-403] Automated anomaly detection Inngest cron job
-- [TASK-404] Sales velocity forecasting per tenant
+- [x] [TASK-401] Natural language query engine with SQL translation & guardrails
+- [x] [TASK-402] AI response caching (`ai_cache`) & daily token metering (100K token cap)
+- [x] [TASK-403] Automated anomaly detection Inngest cron job
+- [x] [TASK-404] Sales velocity forecasting per tenant
 
 ### Phase 5: Billing & Polish
 - [TASK-501] Subscription tiers & limit enforcement middleware

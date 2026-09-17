@@ -88,6 +88,19 @@ export class AiRepository {
       },
     });
   }
+
+  async getTenantCacheCount(tenantId: string): Promise<number> {
+    try {
+      return await prisma.aiCache.count({
+        where: {
+          tenantId,
+          expiresAt: { gt: new Date() },
+        },
+      });
+    } catch {
+      return 0;
+    }
+  }
 }
 
 export const aiRepository = new AiRepository();
