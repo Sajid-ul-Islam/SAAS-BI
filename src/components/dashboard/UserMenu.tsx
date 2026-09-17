@@ -15,8 +15,13 @@ export function UserMenu({ userName, userEmail }: UserMenuProps) {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // Ignore if Supabase offline
+    }
+    document.cookie = 'demo-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     router.push('/login');
     router.refresh();
   };

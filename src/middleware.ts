@@ -39,6 +39,10 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const demoCookie = request.cookies.get('demo-session');
+  const isDemoAuthenticated = demoCookie?.value === 'true';
+  const isAuthenticated = Boolean(user) || isDemoAuthenticated;
+
   const isPublicAuthRoute =
     request.nextUrl.pathname.startsWith('/login') ||
     request.nextUrl.pathname.startsWith('/signup') ||
@@ -47,7 +51,7 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/api/webhooks');
 
   // Protect /dashboard and other tenant routes
-  if (!user && !isPublicAuthRoute && request.nextUrl.pathname !== '/') {
+  if (!isAuthenticated && !isPublicAuthRoute && request.nextUrl.pathname !== '/') {
     // If not authenticated, redirect to /login
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/login';
@@ -56,7 +60,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // If user is already authenticated and visits login/signup, redirect to dashboard
-  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
+  if (isAuthenticated && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/dashboard';
     return NextResponse.redirect(redirectUrl);
@@ -69,6 +73,9 @@ export async function middleware(request: NextRequest) {
       response.headers.set('x-tenant-id', tenantId);
     }
     response.headers.set('x-user-id', user.id);
+  } else if (isDemoAuthenticated) {
+    response.headers.set('x-tenant-id', '00000000-0000-0000-0000-000000000001');
+    response.headers.set('x-user-id', '00000000-0000-0000-0000-000000000001');
   }
 
   return response;

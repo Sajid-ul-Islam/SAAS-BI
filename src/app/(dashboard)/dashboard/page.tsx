@@ -142,7 +142,7 @@ export default async function DashboardOverviewPage() {
             <p className="text-xs text-slate-500">Latest deliveries synced via webhook</p>
           </div>
           <Link
-            href="/orders"
+            href="/dashboard/orders"
             className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
           >
             View all orders <ArrowUpRight className="h-3.5 w-3.5" />
