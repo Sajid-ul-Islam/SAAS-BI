@@ -21,19 +21,32 @@ export class NotificationDispatcher {
       metadata: notification.metadata,
     });
 
-    // In production with Bangladeshi SMS Gateway (e.g. Greenweb / Onnorokom)
+    // In production with Bangladeshi SMS Gateway (e.g. Greenweb / Onnorokom) and Email
     const alertPhone = process.env.MERCHANT_ALERT_PHONE ?? '01711000000';
+    const alertEmail = process.env.MERCHANT_ALERT_EMAIL ?? 'merchant@dhakafashion.com';
+
     if (notification.severity === 'critical') {
       const { smsService } = await import('./sms');
-      const smsRes = await smsService.sendSms({
-        recipient: alertPhone,
-        message: `[SaaS BI Urgent] ${notification.title}: ${notification.message.substring(0, 100)}`,
-        tenantId: notification.tenantId,
-      });
+      const { emailDispatcher } = await import('./email');
+
+      const [smsRes] = await Promise.all([
+        smsService.sendSms({
+          recipient: alertPhone,
+          message: `[SaaS BI Urgent] ${notification.title}: ${notification.message.substring(0, 100)}`,
+          tenantId: notification.tenantId,
+        }),
+        emailDispatcher.sendAnomalyAlertEmail({
+          to: alertEmail,
+          tenantName: 'Dhaka Fashion Hub',
+          title: notification.title,
+          message: notification.message,
+          severity: 'critical',
+        }),
+      ]);
 
       return {
         success: true,
-        channel: `SMS_${smsRes.provider}`,
+        channel: `MULTI_CHANNEL:SMS_${smsRes.provider}+EMAIL`,
       };
     }
 

@@ -8,17 +8,16 @@ export function normalizeBangladeshiPhone(raw: string): string | null {
   // Strip all non-digits
   const digits = raw.replace(/\D/g, '');
 
-  if (digits.length === 11 && digits.startsWith('01')) {
+  if (digits.length === 11 && /^01[3-9]\d{8}$/.test(digits)) {
     return `88${digits}`;
   }
-  if (digits.length === 13 && digits.startsWith('8801')) {
+  if (digits.length === 13 && /^8801[3-9]\d{8}$/.test(digits)) {
     return digits;
   }
-  if (digits.length === 10 && digits.startsWith('1')) {
+  if (digits.length === 10 && /^1[3-9]\d{8}$/.test(digits)) {
     return `880${digits}`;
   }
 
-  // If valid 11-digit mobile starting with 013, 014, 015, 016, 017, 018, 019
   return null;
 }
 

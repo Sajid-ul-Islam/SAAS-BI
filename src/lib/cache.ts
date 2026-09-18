@@ -4,6 +4,9 @@ export interface CacheStore {
   get<T>(key: string): Promise<T | null>;
   set<T>(key: string, value: T, ttlSeconds?: number): Promise<void>;
   del(key: string): Promise<void>;
+  delete(key: string): Promise<void>;
+  clear(): Promise<void>;
+  getMode(): 'upstash' | 'redis' | 'memory';
   invalidatePattern(prefix: string): Promise<number>;
 }
 
@@ -15,11 +18,15 @@ interface InMemoryCacheEntry<T> {
 class InMemoryCache implements CacheStore {
   private store = new Map<string, InMemoryCacheEntry<unknown>>();
 
+  getMode(): 'upstash' | 'redis' | 'memory' {
+    return 'memory';
+  }
+
   async get<T>(key: string): Promise<T | null> {
     const entry = this.store.get(key);
     if (!entry) return null;
 
-    if (entry.expiresAt && Date.now() > entry.expiresAt) {
+    if (entry.expiresAt !== null && Date.now() >= entry.expiresAt) {
       this.store.delete(key);
       return null;
     }
@@ -28,7 +35,7 @@ class InMemoryCache implements CacheStore {
   }
 
   async set<T>(key: string, value: T, ttlSeconds?: number): Promise<void> {
-    const expiresAt = ttlSeconds ? Date.now() + ttlSeconds * 1000 : null;
+    const expiresAt = ttlSeconds !== undefined ? Date.now() + ttlSeconds * 1000 : null;
     this.store.set(key, { value, expiresAt });
 
     // Simple LRU-style cleanup if map exceeds 5000 items
@@ -40,6 +47,14 @@ class InMemoryCache implements CacheStore {
 
   async del(key: string): Promise<void> {
     this.store.delete(key);
+  }
+
+  async delete(key: string): Promise<void> {
+    this.store.delete(key);
+  }
+
+  async clear(): Promise<void> {
+    this.store.clear();
   }
 
   async invalidatePattern(prefix: string): Promise<number> {
@@ -61,6 +76,11 @@ class RedisCache implements CacheStore {
     private url: string,
     private token?: string
   ) {}
+
+  getMode(): 'upstash' | 'redis' | 'memory' {
+    if (this.url.startsWith('https://') && this.token) return 'upstash';
+    return 'redis';
+  }
 
   async get<T>(key: string): Promise<T | null> {
     try {
@@ -112,6 +132,14 @@ class RedisCache implements CacheStore {
     }
   }
 
+  async delete(key: string): Promise<void> {
+    await this.del(key);
+  }
+
+  async clear(): Promise<void> {
+    await this.inMemoryFallback.clear();
+  }
+
   async invalidatePattern(prefix: string): Promise<number> {
     return this.inMemoryFallback.invalidatePattern(prefix);
   }
@@ -137,6 +165,7 @@ function initializeCache(): CacheStore {
 }
 
 export const cache = initializeCache();
+export const cacheService = cache;
 
 /**
  * Helper to get cached value or compute and store it.

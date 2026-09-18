@@ -1,0 +1,74 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: saas_bi_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/saas_bi?schema=public
+      - REDIS_URL=redis://redis:6379
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      - MERCHANT_ALERT_PHONE=01711000000
+      - MERCHANT_ALERT_EMAIL=merchant@dhakafashion.com
+      - ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      - NEXT_PUBLIC_SUPABASE_URL=https://dummy.supabase.co
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy-anon-key
+      - SUPABASE_SERVICE_ROLE_KEY=dummy-service-role-key
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - saas_network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: saas_bi_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: saas_bi
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d saas_bi"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - saas_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: saas_bi_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - saas_network
+
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
+
+networks:
+  saas_network:
+    driver: bridge
