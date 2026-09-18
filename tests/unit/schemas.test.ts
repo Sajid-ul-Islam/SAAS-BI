@@ -105,4 +105,34 @@ describe('Cross-Module Zod Schemas Validation', () => {
       expect(res.success).toBe(true);
     });
   });
+
+  describe('Environment Configuration & Vercel Resilience', () => {
+    it('sanitizes empty environment variables and normalizes URLs without protocol', async () => {
+      const { sanitizeRawEnv, validateEnv } = await import('../../src/config/env');
+
+      const mockVercelEmptyEnv: NodeJS.ProcessEnv = {
+        NODE_ENV: 'production',
+        NEXT_PUBLIC_APP_URL: '   ',
+        DATABASE_URL: '',
+        DIRECT_URL: '   ',
+        NEXT_PUBLIC_SUPABASE_URL: 'my-project.supabase.co',
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: '',
+        SUPABASE_SERVICE_ROLE_KEY: '',
+        ENCRYPTION_KEY: 'too-short',
+        VERCEL_URL: 'saas-bi-five.vercel.app',
+      };
+
+      const sanitized = sanitizeRawEnv(mockVercelEmptyEnv);
+      expect(sanitized.NEXT_PUBLIC_APP_URL).toBe('https://saas-bi-five.vercel.app');
+      expect(sanitized.NEXT_PUBLIC_SUPABASE_URL).toBe('https://my-project.supabase.co');
+      expect(sanitized.DATABASE_URL).toBeUndefined();
+      expect(sanitized.ENCRYPTION_KEY).toBeUndefined();
+
+      const env = validateEnv(mockVercelEmptyEnv);
+      expect(env.NEXT_PUBLIC_APP_URL).toBe('https://saas-bi-five.vercel.app');
+      expect(env.DATABASE_URL).toBe('postgresql://postgres:postgres@localhost:5432/saas_bi');
+      expect(env.ENCRYPTION_KEY).toHaveLength(64);
+      expect(env.NODE_ENV).toBe('production');
+    });
+  });
 });
