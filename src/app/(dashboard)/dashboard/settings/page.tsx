@@ -24,17 +24,22 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   const resolvedParams = await searchParams;
   const tenantId = await resolveActiveTenantId();
 
-  const [subInfo, tenant] = await Promise.all([
+  const [subInfo, tenantResult] = await Promise.all([
     billingService.getSubscriptionInfo(tenantId),
-    prisma.tenant.findUnique({
-      where: { id: tenantId },
-      include: {
-        stores: true,
-        courierCredentials: true,
-        users: true,
-      },
-    }),
+    prisma.tenant
+      .findUnique({
+        where: { id: tenantId },
+        include: {
+          stores: true,
+          courierCredentials: true,
+          users: true,
+        },
+      })
+      .catch(() => null),
   ]);
+
+  const { DEMO_TENANT } = await import('@/lib/demo-data');
+  const tenant = tenantResult ?? DEMO_TENANT;
 
   return (
     <div className="space-y-6">

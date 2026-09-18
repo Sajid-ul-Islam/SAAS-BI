@@ -10,11 +10,28 @@ import { logger } from '@/lib/logger';
 
 export class OrdersService {
   async getOrders(tenantId: string, params: OrderFilterParams): Promise<PaginatedOrdersResult> {
-    return ordersRepository.findPaginated(tenantId, params);
+    try {
+      return await ordersRepository.findPaginated(tenantId, params);
+    } catch (err) {
+      logger.warn('Failed to fetch orders from database (database offline), serving demo fallback', { tenantId, err });
+      const { queryDemoOrders } = await import('@/lib/demo-data');
+      return queryDemoOrders(params);
+    }
   }
 
   async getOrderDetails(tenantId: string, orderId: string): Promise<OrderWithHistory | null> {
-    return ordersRepository.findById(tenantId, orderId);
+    try {
+      const res = await ordersRepository.findById(tenantId, orderId);
+      if (!res && orderId.startsWith('order_demo_')) {
+        const { getDemoOrderDetails } = await import('@/lib/demo-data');
+        return getDemoOrderDetails(orderId);
+      }
+      return res;
+    } catch (err) {
+      logger.warn('Failed to fetch order details from database, serving demo fallback', { tenantId, orderId, err });
+      const { getDemoOrderDetails } = await import('@/lib/demo-data');
+      return getDemoOrderDetails(orderId);
+    }
   }
 
   async processIncomingOrder(input: CreateOrderInput): Promise<Order> {

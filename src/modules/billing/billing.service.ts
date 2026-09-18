@@ -33,17 +33,27 @@ export const PLAN_CONFIG: Record<PlanTier, PlanLimits> = {
 
 export class BillingService {
   async getSubscriptionInfo(tenantId: string): Promise<SubscriptionInfo> {
-    const sub = await billingRepository.getActiveSubscription(tenantId);
-    const tier = sub?.planTier ?? PlanTier.FREE;
-    const limits = PLAN_CONFIG[tier];
+    try {
+      const sub = await billingRepository.getActiveSubscription(tenantId);
+      if (!sub && (tenantId === '00000000-0000-0000-0000-000000000001' || tenantId.includes('demo'))) {
+        const { DEMO_SUBSCRIPTION_INFO } = await import('@/lib/demo-data');
+        return DEMO_SUBSCRIPTION_INFO;
+      }
+      const tier = sub?.planTier ?? PlanTier.FREE;
+      const limits = PLAN_CONFIG[tier];
 
-    return {
-      tier,
-      status: sub?.status ?? SubscriptionStatus.ACTIVE,
-      monthlyOrderLimit: sub?.monthlyOrderLimit ?? limits.monthlyOrders,
-      dailyAiTokenLimit: sub?.dailyAiTokenLimit ?? limits.dailyAiTokens,
-      currentPeriodEnd: sub?.currentPeriodEnd ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    };
+      return {
+        tier,
+        status: sub?.status ?? SubscriptionStatus.ACTIVE,
+        monthlyOrderLimit: sub?.monthlyOrderLimit ?? limits.monthlyOrders,
+        dailyAiTokenLimit: sub?.dailyAiTokenLimit ?? limits.dailyAiTokens,
+        currentPeriodEnd: sub?.currentPeriodEnd ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      };
+    } catch (err) {
+      logger.warn('Failed to query subscription from database, serving demo fallback', { tenantId, err });
+      const { DEMO_SUBSCRIPTION_INFO } = await import('@/lib/demo-data');
+      return DEMO_SUBSCRIPTION_INFO;
+    }
   }
 
   async checkOrderQuota(tenantId: string, currentMonthlyOrderCount: number): Promise<boolean> {

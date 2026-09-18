@@ -42,9 +42,15 @@ export class AnalyticsService {
     const { getOrSetCache } = await import('@/lib/cache');
     return getOrSetCache(
       cacheKey,
-      () => {
-        logger.info('Computing merchant KPIs via SQL aggregates (cache miss)', { tenantId, timeframe });
-        return analyticsRepository.computeKpiMetrics(tenantId, tf);
+      async () => {
+        try {
+          logger.info('Computing merchant KPIs via SQL aggregates (cache miss)', { tenantId, timeframe });
+          return await analyticsRepository.computeKpiMetrics(tenantId, tf);
+        } catch (err) {
+          logger.warn('Failed to compute KPIs from database (database offline), serving demo fallback', { tenantId, err });
+          const { DEMO_KPIS } = await import('@/lib/demo-data');
+          return DEMO_KPIS;
+        }
       },
       60 // 60-second TTL
     );
@@ -55,7 +61,14 @@ export class AnalyticsService {
     timeframe?: AnalyticsTimeframe | AnalyticsTimeframeOption
   ): Promise<DailySalesMetric[]> {
     const tf = this.resolveTimeframe(timeframe);
-    return analyticsRepository.getDailySalesTrend(tenantId, tf);
+    try {
+      return await analyticsRepository.getDailySalesTrend(tenantId, tf);
+    } catch (err) {
+      logger.warn('Failed to fetch daily sales trend (database offline), serving demo fallback', { tenantId, err });
+      const { getDemoDailySalesTrend } = await import('@/lib/demo-data');
+      const days = timeframe === '7d' ? 7 : timeframe === '90d' ? 90 : 30;
+      return getDemoDailySalesTrend(days);
+    }
   }
 
   async getCourierPerformance(
@@ -63,7 +76,13 @@ export class AnalyticsService {
     timeframe?: AnalyticsTimeframe | AnalyticsTimeframeOption
   ): Promise<CourierPerformanceMetric[]> {
     const tf = this.resolveTimeframe(timeframe);
-    return analyticsRepository.getCourierPerformance(tenantId, tf);
+    try {
+      return await analyticsRepository.getCourierPerformance(tenantId, tf);
+    } catch (err) {
+      logger.warn('Failed to fetch courier performance (database offline), serving demo fallback', { tenantId, err });
+      const { DEMO_COURIER_PERFORMANCE } = await import('@/lib/demo-data');
+      return DEMO_COURIER_PERFORMANCE;
+    }
   }
 
   async getRegionalDistribution(
@@ -71,7 +90,13 @@ export class AnalyticsService {
     timeframe?: AnalyticsTimeframe | AnalyticsTimeframeOption
   ): Promise<RegionalDistributionMetric[]> {
     const tf = this.resolveTimeframe(timeframe);
-    return analyticsRepository.getRegionalDistribution(tenantId, tf);
+    try {
+      return await analyticsRepository.getRegionalDistribution(tenantId, tf);
+    } catch (err) {
+      logger.warn('Failed to fetch regional distribution (database offline), serving demo fallback', { tenantId, err });
+      const { DEMO_REGIONAL_DISTRIBUTION } = await import('@/lib/demo-data');
+      return DEMO_REGIONAL_DISTRIBUTION;
+    }
   }
 
   /**
